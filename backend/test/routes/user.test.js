@@ -11,14 +11,33 @@ test("Should list all users", async () => {
   expect(response.body.length).toBeGreaterThan(0);
 });
 
+test("Should save crypt password", async () => {
+  const response = await request(app)
+    .post("/users")
+    .send({
+      name: "Crypt",
+      email: `${Date.now()}@email.com`,
+      password: "123123",
+    });
+  expect(response.status).toBe(201);
+
+  const { id } = response.body;
+  const userDB = await app.services.user.findOne({ id });
+  expect(userDB.password).not.toBe(undefined);
+  expect(userDB.password).not.toBe("123123");
+});
+
 test("Should return an user", async () => {
-  const response = await request(app).post("/users").send({
-    name: "Paul",
-    email: mail,
-    password: "123123",
-  });
+  const response = await request(app)
+    .post("/users")
+    .send({
+      name: "Paul",
+      email: `${Date.now()}@email.com`,
+      password: "123123",
+    });
   expect(response.status).toBe(201);
   expect(response.body.name).toBe("Paul");
+  expect(response.body).not.toHaveProperty("password");
 });
 
 test("Should not be able to insert an user without name", async () => {
@@ -43,7 +62,7 @@ test("Should no be able to insert an user without password", (done) => {
   request(app)
     .post("/users")
     .send({
-      name: "Paul",
+      name: "With no Password",
       email: "email@email.com",
     })
     .then((res) => {
@@ -56,8 +75,8 @@ test("Should no be able to insert an user without password", (done) => {
 
 test("Email must be unique", async () => {
   const response = await request(app).post("/users").send({
-    name: "Paul",
-    email: mail,
+    name: "Email Unique",
+    email: "1586291446697@email.com",
     password: "123123",
   });
   expect(response.status).toBe(400);
