@@ -10,5 +10,9 @@ module.exports = (app) => {
     .get(app.routes.accounts.findAll)
     .post(app.routes.accounts.create);
 
-  app.route(`/accounts/:id`).get(app.routes.accounts.show);
+  app
+    .route(`/accounts/:id`)
+    .get(app.routes.accounts.show)
+    .put(app.routes.accounts.update)
+    .delete(app.routes.accounts.remove);
 };

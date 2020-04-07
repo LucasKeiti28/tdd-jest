@@ -17,6 +17,17 @@ beforeAll(async () => {
   user = { ...res[0] };
 });
 
+test("Should not insert an account withou name", async () => {
+  const response = await request(app)
+    .post(MAIN_ROUTE)
+    .send({ user_id: user.id });
+
+  expect(response.status).toBe(400);
+  expect(response.body.error).toBe("Must have name");
+});
+
+test.skip("Should not insert a duplicated account for same user.", () => {});
+
 test("Should insert account successfuly", () =>
   request(app)
     .post(MAIN_ROUTE)
@@ -38,6 +49,8 @@ test("Should list all accounts", async () => {
   expect(response.body.length).toBeGreaterThan(0);
 });
 
+test.skip("Should list all account from determinated user", () => {});
+
 test("Should return one account per id", async () => {
   const users = await app.db("accounts").insert(
     {
@@ -53,3 +66,41 @@ test("Should return one account per id", async () => {
   expect(response.body.name).toBe("Acc by ID");
   expect(response.body.user_id).toBe(user.id);
 });
+
+test.skip("Should not return an account from another user", () => {});
+
+test("Should update an account", async () => {
+  const users = await app.db("accounts").insert(
+    {
+      name: "Acc to Update",
+      user_id: user.id,
+    },
+    ["id"]
+  );
+
+  const response = await request(app)
+    .put(`${MAIN_ROUTE}/${users[0].id}`)
+    .send({ name: "Acc Updated" });
+
+  expect(response.status).toBe(200);
+  expect(response.body.name).toBe("Acc Updated");
+  expect(response.body.user_id).toBe(user.id);
+});
+
+test.skip("Should not update an account from another user", () => {});
+
+test("Should delete an account", async () => {
+  const users = await app.db("accounts").insert(
+    {
+      name: "Acc to Delete",
+      user_id: user.id,
+    },
+    ["id"]
+  );
+
+  const response = await request(app).delete(`${MAIN_ROUTE}/${users[0].id}`);
+
+  expect(response.status).toBe(204);
+});
+
+test.skip("Should not delete an account from another user", () => {});
