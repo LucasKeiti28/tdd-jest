@@ -4,7 +4,7 @@ const jwt = require("jwt-simple");
 
 const app = require("../../src/app");
 
-const mail = `${Date.now()}@email.com`;
+// const mail = `${Date.now()}@email.com`;
 
 let user;
 
@@ -20,7 +20,7 @@ beforeAll(async () => {
 
 test("Should list all users", async () => {
   const response = await request(app)
-    .get("/users")
+    .get("/v1/users")
     .set("authorization", `bearer ${user.token}`);
   expect(response.status).toBe(200);
   expect(response.body.length).toBeGreaterThan(0);
@@ -28,7 +28,7 @@ test("Should list all users", async () => {
 
 test("Should save crypt password", async () => {
   const response = await request(app)
-    .post("/users")
+    .post("/v1/users")
     .send({
       name: "Crypt",
       email: `${Date.now()}@email.com`,
@@ -45,7 +45,7 @@ test("Should save crypt password", async () => {
 
 test("Should return an user", async () => {
   const response = await request(app)
-    .post("/users")
+    .post("/v1/users")
     .send({
       name: "Paul",
       email: `${Date.now()}@email.com`,
@@ -59,7 +59,7 @@ test("Should return an user", async () => {
 
 test("Should not be able to insert an user without name", async () => {
   const response = await request(app)
-    .post("/users")
+    .post("/v1/users")
     .send({
       email: "teste@mail.com",
       password: "123123",
@@ -71,7 +71,7 @@ test("Should not be able to insert an user without name", async () => {
 
 test("Should not be able to insert an user without an unique e-mail", async () => {
   const response = await request(app)
-    .post("/users")
+    .post("/v1/users")
     .send({ name: "Paul", password: "123123" })
     .set("authorization", `bearer ${user.token}`);
 
@@ -81,7 +81,7 @@ test("Should not be able to insert an user without an unique e-mail", async () =
 
 test("Should no be able to insert an user without password", (done) => {
   request(app)
-    .post("/users")
+    .post("/v1/users")
     .send({
       name: "With no Password",
       email: "email@email.com",
@@ -97,7 +97,7 @@ test("Should no be able to insert an user without password", (done) => {
 
 test("Email must be unique", async () => {
   const response = await request(app)
-    .post("/users")
+    .post("/v1/users")
     .send({
       name: "Email Unique",
       email: "1586291446697@email.com",

@@ -4,13 +4,23 @@
 const ValidationError = require("../errors/ValidationError");
 
 module.exports = (app) => {
+  const findAll = (user_id) => app.db("accounts").where({ user_id });
+
+  const find = (filter = {}) => app.db("accounts").where(filter).first();
+
   const save = async (account) => {
     if (!account.name) throw new ValidationError("Must have name");
 
+    const accountDB = await find({
+      name: account.name,
+      user_id: account.user_id,
+    });
+    if (accountDB) {
+      throw new ValidationError("Duplicated name for the same user");
+    }
+
     return app.db("accounts").insert(account, "*");
   };
-
-  const findAll = () => app.db("accounts");
 
   const show = (id) => app.db("accounts").where(id).first();
 
@@ -25,5 +35,6 @@ module.exports = (app) => {
     show,
     update,
     remove,
+    find,
   };
 };

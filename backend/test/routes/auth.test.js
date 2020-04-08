@@ -69,7 +69,7 @@ test("Auth failed with user not exist", async () => {
 });
 
 test("Should not access authenticate route with valid token", async () => {
-  const response = await request(app).get("/users");
+  const response = await request(app).get("/v1/users");
 
   expect(response.status).toBe(401);
 });

@@ -1,12 +1,15 @@
 /* eslint-disable consistent-return */
 /* eslint-disable quotes */
+const express = require("express");
 const jwt = require("jwt-simple");
 const bcrypt = require("bcrypt-nodejs");
 
 const ValidationError = require("../errors/ValidationError");
 
 module.exports = (app) => {
-  const signin = async (req, res, next) => {
+  const router = express.Router();
+
+  router.post("/signin", async (req, res, next) => {
     try {
       const userDB = await app.services.user.findOne({ email: req.body.email });
 
@@ -25,6 +28,19 @@ module.exports = (app) => {
     } catch (error) {
       return next(error);
     }
-  };
-  return { signin };
+  });
+
+  router.post("/signup", async (req, res, next) => {
+    try {
+      const data = req.body;
+
+      const user = await app.services.user.save(data);
+
+      return res.status(201).json(user[0]);
+    } catch (error) {
+      return next(error);
+    }
+  });
+
+  return router;
 };
