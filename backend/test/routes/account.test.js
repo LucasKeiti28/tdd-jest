@@ -2,6 +2,7 @@
 /* eslint-disable implicit-arrow-linebreak */
 /* eslint-disable quotes */
 const request = require("supertest");
+const jwt = require("jwt-simple");
 
 const app = require("../../src/app");
 
@@ -15,12 +16,14 @@ beforeAll(async () => {
     password: "123123",
   });
   user = { ...res[0] };
+  user.token = jwt.encode(user, "ChaveSecreta");
 });
 
 test("Should not insert an account withou name", async () => {
   const response = await request(app)
     .post(MAIN_ROUTE)
-    .send({ user_id: user.id });
+    .send({ user_id: user.id })
+    .set("authorization", `bearer ${user.token}`);
 
   expect(response.status).toBe(400);
   expect(response.body.error).toBe("Must have name");
@@ -32,6 +35,7 @@ test("Should insert account successfuly", () =>
   request(app)
     .post(MAIN_ROUTE)
     .send({ name: "Acc #1", user_id: user.id })
+    .set("authorization", `bearer ${user.token}`)
     .then((result) => {
       expect(result.status).toBe(201);
       expect(result.body.name).toBe("Acc #1");
@@ -43,7 +47,9 @@ test("Should list all accounts", async () => {
     user_id: user.id,
   });
 
-  const response = await request(app).get(MAIN_ROUTE);
+  const response = await request(app)
+    .get(MAIN_ROUTE)
+    .set("authorization", `bearer ${user.token}`);
 
   expect(response.status).toBe(200);
   expect(response.body.length).toBeGreaterThan(0);
@@ -60,7 +66,9 @@ test("Should return one account per id", async () => {
     ["id"]
   );
 
-  const response = await request(app).get(`${MAIN_ROUTE}/${users[0].id}`);
+  const response = await request(app)
+    .get(`${MAIN_ROUTE}/${users[0].id}`)
+    .set("authorization", `bearer ${user.token}`);
 
   expect(response.status).toBe(200);
   expect(response.body.name).toBe("Acc by ID");
@@ -80,7 +88,8 @@ test("Should update an account", async () => {
 
   const response = await request(app)
     .put(`${MAIN_ROUTE}/${users[0].id}`)
-    .send({ name: "Acc Updated" });
+    .send({ name: "Acc Updated" })
+    .set("authorization", `bearer ${user.token}`);
 
   expect(response.status).toBe(200);
   expect(response.body.name).toBe("Acc Updated");
@@ -98,7 +107,9 @@ test("Should delete an account", async () => {
     ["id"]
   );
 
-  const response = await request(app).delete(`${MAIN_ROUTE}/${users[0].id}`);
+  const response = await request(app)
+    .delete(`${MAIN_ROUTE}/${users[0].id}`)
+    .set("authorization", `bearer ${user.token}`);
 
   expect(response.status).toBe(204);
 });
